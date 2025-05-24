@@ -1,11 +1,13 @@
 <script>
-// public/js/ajax/fetchReportData.js
+// Note: This script is intended to be part of reports/template/fetch-reports-data-from-meta.php
+// It assumes jQuery is available and that window.metrics (from assets/js/metrics.js) is loaded.
 
 function fetchReportData(start, end) {
     console.log("Fetching report data for:", start, "to", end);
+    const currency = window.currencySymbol || '$';
 
     $.ajax({
-        url: '/../../backend/controllers/FetchReportDataFromMeta.php',
+        url: '/backend/controllers/FetchReportDataFromMeta.php', // Corrected absolute path
         method: 'POST',
         data: {
             start_date: start,
