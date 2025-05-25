@@ -34,6 +34,8 @@ $adAccountId = $config['ad_account_id'];
 
 try {
     $timeRange = json_encode(['since' => $startDate, 'until' => $endDate]);
+    // Encode the JSON string to avoid malformed query errors
+    $encodedRange = urlencode($timeRange);
 
     $insightMetrics = [
         'spend',
@@ -57,7 +59,7 @@ try {
     $creativeFields = 'object_story_id,thumbnail_url,object_story_spec,asset_feed_spec,call_to_action_type,body,link_destination_display_url,status,video_id,branded_content,object_type';
     $fields = 'id,name,creative{' . $creativeFields . '},insights.fields(' . implode(',', $insightMetrics) . ')';
 
-    $response = $fb->get("/$adAccountId/ads?fields=" . urlencode($fields) . "&time_range=$timeRange&limit=100");
+    $response = $fb->get("/$adAccountId/ads?fields=" . urlencode($fields) . "&time_range=$encodedRange&limit=100");
     $ads = $response->getDecodedBody();
 
     if (!empty($ads['data'])) {
