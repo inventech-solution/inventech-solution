@@ -17,7 +17,7 @@ require_once __DIR__ . "/backend/controllers/DashboardController.php";
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="/assets/js/fetch-metrics-from-db.js"></script>
+    <script src="assets/js/fetch-metrics-from-db.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script><!-- Alpine.js (for x-data, x-show, @click) -->
     <link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
     <style>
@@ -101,7 +101,7 @@ Teal: #008080
             <div>
                 <!-- Logo -->
                 <div class="flex items-center justify-between p-4">
-                    <img src="/assets/images/logo/AdsInsight-ai.png" alt="Logo" class="h-6" x-show="sidebarOpen">
+                    <img src="assets/images/logo/AdsInsight-ai.png" alt="Logo" class="h-6" x-show="sidebarOpen">
                     <button @click="sidebarOpen = !sidebarOpen" class="focus:outline-none">
                         <i class="hgi hgi-stroke hgi-sidebar-left text-xl"></i>
                     </button>
