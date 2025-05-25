@@ -2,6 +2,57 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../facebookConfig.php';
+require_once __DIR__ . '/../models/Metrics.php';
+
+function groupAds(array $ads, string $groupBy): array {
+    $groups = [];
+    foreach ($ads as $ad) {
+        switch ($groupBy) {
+            case 'Ad Name':
+                $key = $ad['name'] ?? 'Unknown';
+                break;
+            case 'Creative':
+                $key = $ad['creative']['object_type'] ?? 'Unknown';
+                break;
+            case 'Copy':
+                $key = $ad['creative']['body'] ?? 'Unknown';
+                break;
+            case 'Headline':
+                $key = $ad['creative']['object_story_spec']['link_data']['name'] ?? 'Unknown';
+                break;
+            case 'Landing Page':
+                $key = $ad['creative']['link_destination_display_url'] ?? 'Unknown';
+                break;
+            case 'CTA Button':
+                $key = $ad['creative']['call_to_action_type'] ?? 'Unknown';
+                break;
+            case 'Discount Code':
+                $key = $ad['creative']['asset_feed_spec']['bodies'][0]['text'] ?? 'Unknown';
+                break;
+            case 'Post ID':
+                $key = $ad['creative']['object_story_id'] ?? 'Unknown';
+                break;
+            default:
+                $key = 'Ungrouped';
+        }
+        $groups[$key][] = $ad;
+    }
+    return $groups;
+}
+
+function metricsByGroup(array $groups): array {
+    $result = [];
+    foreach ($groups as $key => $ads) {
+        $result[$key] = [
+            'spend' => Metrics::spend($ads),
+            'impressions' => Metrics::impressions($ads),
+            'clicks' => Metrics::clicks($ads),
+            'ctr' => Metrics::ctr($ads),
+            'purchase_roas' => Metrics::purchase_roas($ads)
+        ];
+    }
+    return $result;
+}
 
 function validateDate(string $date)
 {
@@ -11,6 +62,7 @@ function validateDate(string $date)
 
 $startDateStr = $_POST['start_date'] ?? '';
 $endDateStr   = $_POST['end_date'] ?? '';
+$groupBy      = $_POST['group_by'] ?? 'Ad Name';
 
 $startDate = validateDate($startDateStr);
 $endDate   = validateDate($endDateStr);
@@ -70,9 +122,14 @@ try {
                 $ad['video_details'] = $videoResp->getDecodedBody();
             }
         }
-    }
 
-    echo json_encode(['success' => true, 'data' => $ads]);
+        $grouped = groupAds($ads['data'], $groupBy);
+        $metrics   = metricsByGroup($grouped);
+
+        echo json_encode(['success' => true, 'data' => $ads['data'], 'metrics_by_group' => $metrics]);
+    } else {
+        echo json_encode(['success' => true, 'data' => [], 'metrics_by_group' => []]);
+    }
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'API error: ' . $e->getMessage()]);
