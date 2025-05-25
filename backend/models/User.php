@@ -21,10 +21,10 @@ class User {
         
         if ($this->conn->query($query)) {
             return true;
-            $this->conn->error;
         } else {
-            error_log("Database error: " . $this->conn->error); // Log error to PHP error log
-    echo $this->conn->error;
+            // Log error and return false on failure
+            error_log("Database error: " . $this->conn->error);
+            return false;
         }
     }
 
