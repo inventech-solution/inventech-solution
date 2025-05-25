@@ -3,20 +3,32 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../facebookConfig.php';
 
-function isValidDate($date)
+function validateDate(string $date)
 {
     $d = DateTime::createFromFormat('Y-m-d', $date);
-    return $d && $d->format('Y-m-d') === $date;
+    return $d && $d->format('Y-m-d') === $date ? $d : false;
 }
 
-$startDate = $_POST['start_date'] ?? null;
-$endDate   = $_POST['end_date'] ?? null;
+$startDateStr = $_POST['start_date'] ?? '';
+$endDateStr   = $_POST['end_date'] ?? '';
 
-if (!$startDate || !$endDate || !isValidDate($startDate) || !isValidDate($endDate)) {
+$startDate = validateDate($startDateStr);
+$endDate   = validateDate($endDateStr);
+
+if (!$startDate || !$endDate) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Missing or invalid date range']);
+    echo json_encode(['success' => false, 'message' => 'Invalid start or end date']);
     exit;
 }
+
+if ($startDate > $endDate) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Start date cannot be after end date']);
+    exit;
+}
+
+$startDate = $startDate->format('Y-m-d');
+$endDate   = $endDate->format('Y-m-d');
 
 $adAccountId = $config['ad_account_id'];
 
