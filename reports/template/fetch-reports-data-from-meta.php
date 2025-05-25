@@ -2,8 +2,63 @@
 // public/js/ajax/fetchReportData.js
 
 
+function groupAdsData(ads, groupBy) {
+    const groups = {};
+    ads.forEach(ad => {
+        let key;
+        switch (groupBy) {
+            case 'Ad Name':
+                key = ad.name || 'Unknown';
+                break;
+            case 'Creative':
+                key = ad.creative?.object_type || 'Unknown';
+                break;
+            case 'Copy':
+                key = ad.creative?.body || 'Unknown';
+                break;
+            case 'Headline':
+                key = ad.creative?.object_story_spec?.link_data?.name || 'Unknown';
+                break;
+            case 'Landing Page':
+                key = ad.creative?.link_destination_display_url || 'Unknown';
+                break;
+            case 'CTA Button':
+                key = ad.creative?.call_to_action_type || 'Unknown';
+                break;
+            case 'Discount Code':
+                key = ad.creative?.asset_feed_spec?.bodies?.[0]?.text || 'Unknown';
+                break;
+            case 'Post ID':
+                key = ad.creative?.object_story_id || 'Unknown';
+                break;
+            default:
+                key = 'Ungrouped';
+        }
+        if (!groups[key]) {
+            groups[key] = [];
+        }
+        groups[key].push(ad);
+    });
+    return groups;
+}
+
+function computeMetricsByGroup(groups) {
+    const result = {};
+    Object.keys(groups).forEach(key => {
+        const adsData = groups[key];
+        result[key] = {
+            spend: window.metrics.spend(adsData),
+            impressions: window.metrics.impressions(adsData),
+            clicks: window.metrics.clicks(adsData),
+            ctr: window.metrics.ctr(adsData),
+            purchase_roas: window.metrics.purchase_roas(adsData)
+        };
+    });
+    return result;
+}
+
 function fetchReportData(start, end) {
-    console.log("Fetching report data for:", start, "to", end);
+    console.log('Fetching report data for:', start, 'to', end);
 
     $.ajax({
         url: '/inventech-solution/backend/controllers/FetchReportDataFromMeta.php',
@@ -20,12 +75,17 @@ function fetchReportData(start, end) {
         success: function(response) {
             $('#loading-indicator').hide();
             if (response.success) {
-                const metricsByGroup = response.metrics_by_group || {};
-                console.log('Grouped Metrics:', metricsByGroup);
+                console.log('Raw API Data:', response.data);
 
-                const firstGroup = Object.keys(metricsByGroup)[0];
-                if (firstGroup && metricsByGroup[firstGroup].spend !== undefined) {
-                    $('#total-spend').text(`$${metricsByGroup[firstGroup].spend}`);
+                const groups = groupAdsData(response.data || [], currentState.groupBy || 'Ad Name');
+                console.log('Grouped Ads:', groups);
+                const processed = computeMetricsByGroup(groups);
+
+                console.log('Processed Metrics:', processed);
+
+                const firstGroup = Object.keys(processed)[0];
+                if (firstGroup && processed[firstGroup].spend !== undefined) {
+                    $('#total-spend').text(`$${processed[firstGroup].spend}`);
                 }
             } else {
                 console.error('API Error:', response.message);
