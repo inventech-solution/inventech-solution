@@ -26,7 +26,7 @@ if (is_array($checkReportIdDetails) && isset($checkReportIdDetails['report_type'
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<link rel="stylesheet" href="/assets/css/datepicker.css" />
+<link rel="stylesheet" href="/inventech-solution/assets/css/datepicker.css" />
 <!-- Include date picker over -->
 <script>
     

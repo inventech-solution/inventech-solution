@@ -8,7 +8,8 @@ window.metricStore = {
 
     load: function () {
         return $.ajax({
-            url: '../../backend/controllers/FetchMetricsFromDB.php',
+            // Use an absolute path so the request works from any subdirectory
+            url: '/inventech-solution/backend/controllers/FetchMetricsFromDB.php',
             method: 'GET',
             dataType: 'json',
             success: (data) => {

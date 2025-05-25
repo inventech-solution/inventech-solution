@@ -17,7 +17,7 @@ require_once __DIR__ . "/backend/controllers/DashboardController.php";
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="assets/js/fetch-metrics-from-db.js" defer></script>
+    <script src="/inventech-solution/assets/js/fetch-metrics-from-db.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script><!-- Alpine.js (for x-data, x-show, @click) -->
     <link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
     <style>
@@ -101,7 +101,7 @@ Teal: #008080
             <div>
                 <!-- Logo -->
                 <div class="flex items-center justify-between p-4">
-                    <img src="assets/images/logo/AdsInsight-ai.png" alt="Logo" class="h-6" x-show="sidebarOpen">
+                    <img src="/inventech-solution/assets/images/logo/AdsInsight-ai.png" alt="Logo" class="h-6" x-show="sidebarOpen">
                     <button @click="sidebarOpen = !sidebarOpen" class="focus:outline-none">
                         <i class="hgi hgi-stroke hgi-sidebar-left text-xl"></i>
                     </button>
@@ -152,7 +152,7 @@ Teal: #008080
                         <div class="text-sm text-gray-400 px-4">No reports in this folder.</div>
                         <?php else: ?>
                         <?php foreach ($folder['reports'] as $report): ?>
-                            <a href="/reports/?rid=<?= $report['uid'] ?>" class="flex items-center px-2 py-2 hover:bg-gray-200 rounded transition-all">
+                            <a href="/inventech-solution/reports/?rid=<?= $report['uid'] ?>" class="flex items-center px-2 py-2 hover:bg-gray-200 rounded transition-all">
                                 <i class="hgi hgi-stroke hgi-analytics-up text-xl"></i>
                                 <span x-show="sidebarOpen" class="ml-1 text-sm"><?= htmlspecialchars($report['title']) ?></span>
                             </a>
@@ -171,8 +171,8 @@ Teal: #008080
                     <span x-show="sidebarOpen" class="ml-3">New Folder</span>
                 </button>
                 <template x-for="item in [
-                { name: 'Settings', path: '/settings', icon: 'hgi-configuration-02' },
-                { name: 'Logout', path: '/logout', icon: 'hgi-logout-03' }
+                { name: 'Settings', path: '/inventech-solution/settings', icon: 'hgi-configuration-02' },
+                { name: 'Logout', path: '/inventech-solution/logout.php', icon: 'hgi-logout-03' }
                 ]" :key="item.path">
                     <div class="relative group">
                         <a @click.prevent="window.location.href = item.path"

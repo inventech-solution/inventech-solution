@@ -5,7 +5,7 @@ function fetchReportData(start, end) {
     console.log("Fetching report data for:", start, "to", end);
 
     $.ajax({
-        url: '/../../backend/controllers/FetchReportDataFromMeta.php',
+        url: '/inventech-solution/backend/controllers/FetchReportDataFromMeta.php',
         method: 'POST',
         data: {
             start_date: start,

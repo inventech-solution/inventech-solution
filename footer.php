@@ -26,7 +26,7 @@
     <script>
         function addFolder() {
             const folderName = document.getElementById('folderName').value;
-            fetch('/backend/controllers/DashboardController.php', {
+            fetch('/inventech-solution/backend/controllers/DashboardController.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: folderName })
