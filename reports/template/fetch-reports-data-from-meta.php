@@ -78,6 +78,7 @@ function fetchReportData(start, end) {
         dataType: 'json',
         beforeSend: function() {
             $('#loading-indicator').show();
+            window.dispatchEvent(new Event('reportDataLoading'));
         },
         success: function(response) {
             $('#loading-indicator').hide();
@@ -89,6 +90,8 @@ function fetchReportData(start, end) {
                 const processed = computeMetricsByGroup(groups);
 
                 console.log('Processed Metrics:', processed);
+                window.reportMetrics = processed;
+                window.dispatchEvent(new CustomEvent('reportDataUpdated', { detail: processed }));
 
                 const firstGroup = Object.keys(processed)[0];
                 if (firstGroup && processed[firstGroup].spend !== undefined) {
@@ -111,6 +114,8 @@ function fetchReportData(start, end) {
 window.fetchReportDataFromPicker = function(start, end) {
     fetchReportData(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
 };
+
+window.dispatchEvent(new Event('fetchReportDataReady'));
 
 $(document).ready(function() {
     // Any code that uses fetchReportDataFromPicker now works
