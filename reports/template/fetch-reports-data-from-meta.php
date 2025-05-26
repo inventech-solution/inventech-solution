@@ -6,6 +6,12 @@ function groupAdsData(ads, groupBy) {
     const groups = {};
     const adArray = Array.isArray(ads) ? ads : (ads && Array.isArray(ads.data) ? ads.data : []);
     adArray.forEach(ad => {
+        // Facebook API returns insights as an object with a `data` array
+        // but our metric calculations expect `insights` to be an array.
+        if (ad.insights && Array.isArray(ad.insights.data)) {
+            ad.insights = ad.insights.data;
+        }
+
         let key;
         switch (groupBy) {
             case 'Ad Name':
