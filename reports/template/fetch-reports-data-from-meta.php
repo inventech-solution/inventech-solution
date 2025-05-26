@@ -89,6 +89,8 @@ function fetchReportData(start, end) {
                 const processed = computeMetricsByGroup(groups);
 
                 console.log('Processed Metrics:', processed);
+                window.reportMetrics = processed;
+                window.dispatchEvent(new CustomEvent('reportDataUpdated', { detail: processed }));
 
                 const firstGroup = Object.keys(processed)[0];
                 if (firstGroup && processed[firstGroup].spend !== undefined) {

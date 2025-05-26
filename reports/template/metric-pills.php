@@ -119,6 +119,7 @@ document.addEventListener('alpine:init', () => {
                 this.selectedIds = this.selectedMetrics.map(m => m.id);
                 currentState.card_metrics = [...this.selectedIds];
                 unsavedChanges = true;
+                window.dispatchEvent(new CustomEvent('metricsChanged', { detail: this.selectedIds }));
             },
 
             dragStart(index) {
