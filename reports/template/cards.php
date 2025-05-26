@@ -1,5 +1,4 @@
-<div id="cards-loading" class="text-center py-3">Loading...</div>
-<div id="metric-cards" class="row" style="display:none;"></div>
+<div id="metric-cards" class="row"></div>
 
 <style>
 .card-item {
@@ -25,11 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cardApp = {
         metrics: Array.isArray(currentState.card_metrics) ? [...currentState.card_metrics] : [],
         data: window.reportMetrics || {},
-        container: null,
-        loader: null,
         init() {
-            this.container = document.getElementById('metric-cards');
-            this.loader = document.getElementById('cards-loading');
             window.addEventListener('metricsChanged', (e) => {
                 this.metrics = e.detail || [];
                 this.render();
@@ -38,14 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.data = e.detail || {};
                 this.render();
             });
-            window.addEventListener('reportDataLoading', () => {
-                this.showLoader();
-            });
             this.render();
-        },
-        showLoader() {
-            if (this.loader) this.loader.style.display = 'block';
-            if (this.container) this.container.style.display = 'none';
         },
         getValue(slug) {
             const group = Object.keys(this.data)[0];
@@ -54,15 +42,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return val !== undefined ? val : '-';
         },
         render() {
-            if (!this.container) return;
-            this.container.innerHTML = '';
+            const container = document.getElementById('metric-cards');
+            if (!container) return;
+            container.innerHTML = '';
             const group = Object.keys(this.data)[0];
-            if (!group) {
-                this.showLoader();
-                return;
-            }
-            if (this.loader) this.loader.style.display = 'none';
-            this.container.style.display = 'flex';
+            if (!group) return;
             this.metrics.forEach(id => {
                 const info = window.metricStore.getById(Number(id));
                 if (!info) return;
@@ -71,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const col = document.createElement('div');
                 col.className = 'col-md-4 mb-3';
                 col.innerHTML = `<div class="card-item"><div class="card-name">${info.name}</div><div class="card-value" data-slug="${slug}">${value}</div></div>`;
-                this.container.appendChild(col);
+                container.appendChild(col);
             });
         }
     };
