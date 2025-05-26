@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.data = e.detail || {};
                 this.render();
             });
+            if (!window.metricStore.loaded) {
+                window.metricStore.load().then(() => {
+                    this.render();
+                });
+            }
             this.render();
         },
         getValue(slug) {
