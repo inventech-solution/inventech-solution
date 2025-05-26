@@ -21,18 +21,33 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    function slugify(name) {
+        if (!name) return '';
+        const paren = name.match(/\(([^)]+)\)$/);
+        if (paren) return paren[1].toLowerCase();
+        return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    }
     const cardApp = {
         metrics: Array.isArray(currentState.card_metrics) ? [...currentState.card_metrics] : [],
         data: window.reportMetrics || {},
         init() {
             window.addEventListener('metricsChanged', (e) => {
                 this.metrics = e.detail || [];
+                console.debug('metricsChanged', this.metrics);
                 this.render();
             });
             window.addEventListener('reportDataUpdated', (e) => {
                 this.data = e.detail || {};
+                console.debug('reportDataUpdated', this.data);
                 this.render();
             });
+            if (!window.metricStore.loaded) {
+                console.debug('loading metric definitions for cards');
+                window.metricStore.load().then(() => {
+                    console.debug('metric definitions loaded');
+                    this.render();
+                });
+            }
             this.render();
         },
         getValue(slug) {
@@ -46,12 +61,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!container) return;
             container.innerHTML = '';
             const group = Object.keys(this.data)[0];
-            if (!group) return;
+            if (!group) {
+                console.debug('no data group yet, skipping render');
+                return;
+            }
             this.metrics.forEach(id => {
                 const info = window.metricStore.getById(Number(id));
                 if (!info) return;
-                const slug = info.slug || (info.name ? info.name.toLowerCase().replace(/\s+/g, '_') : '');
+                const slug = info.slug || slugify(info.name || '');
                 const value = this.getValue(slug);
+                console.debug('render card', {id, name: info.name, slug, value});
                 const col = document.createElement('div');
                 col.className = 'col-md-4 mb-3';
                 col.innerHTML = `<div class="card-item"><div class="card-name">${info.name}</div><div class="card-value" data-slug="${slug}">${value}</div></div>`;
