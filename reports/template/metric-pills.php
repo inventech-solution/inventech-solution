@@ -102,6 +102,7 @@ document.addEventListener('alpine:init', () => {
                     .filter(Boolean);
                     initialState.card_metrics = [...this.selectedIds];
                     currentState.card_metrics = initialState.card_metrics;
+                    window.dispatchEvent(new CustomEvent('metricsChanged', { detail: this.selectedIds }));
             },
 
             addMetric(metric) {
