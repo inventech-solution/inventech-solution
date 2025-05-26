@@ -21,6 +21,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    function slugify(name) {
+        if (!name) return '';
+        const paren = name.match(/\(([^)]+)\)$/);
+        if (paren) return paren[1].toLowerCase();
+        return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    }
     const cardApp = {
         metrics: Array.isArray(currentState.card_metrics) ? [...currentState.card_metrics] : [],
         data: window.reportMetrics || {},
@@ -50,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.metrics.forEach(id => {
                 const info = window.metricStore.getById(Number(id));
                 if (!info) return;
-                const slug = info.slug || (info.name ? info.name.toLowerCase().replace(/\s+/g, '_') : '');
+                const slug = info.slug || slugify(info.name || '');
                 const value = this.getValue(slug);
                 const col = document.createElement('div');
                 col.className = 'col-md-4 mb-3';
