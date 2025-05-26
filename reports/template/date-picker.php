@@ -86,8 +86,20 @@ function initDatePicker() {
         const initialDateRange = matchedLabel ?? formatted;
         currentState.dateRange = initialDateRange;
         initialState.dateRange = initialDateRange;
-        fetchReportDataFromPicker(start, end);
+        const callFetch = () => {
+            if (typeof window.fetchReportDataFromPicker === 'function') {
+                fetchReportDataFromPicker(start, end);
+            }
+        };
+        if (typeof window.fetchReportDataFromPicker === 'function') {
+            callFetch();
+        } else {
+            window.addEventListener('fetchReportDataReady', function handler() {
+                window.removeEventListener('fetchReportDataReady', handler);
+                callFetch();
+            });
+        }
     }
-}  
+}
 
 </script>
