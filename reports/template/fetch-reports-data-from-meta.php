@@ -45,16 +45,20 @@ function groupAdsData(ads, groupBy) {
 
 function computeMetricsByGroup(groups) {
     const result = {};
+    const metricNames = Object.keys(window.metrics || {});
+
     Object.keys(groups).forEach(key => {
         const adsData = groups[key];
-        result[key] = {
-            spend: window.metrics.spend(adsData),
-            impressions: window.metrics.impressions(adsData),
-            clicks: window.metrics.clicks(adsData),
-            ctr: window.metrics.ctr(adsData),
-            purchase_roas: window.metrics.purchase_roas(adsData)
-        };
+        result[key] = {};
+
+        metricNames.forEach(metric => {
+            const fn = window.metrics[metric];
+            if (typeof fn === 'function') {
+                result[key][metric] = fn(adsData);
+            }
+        });
     });
+
     return result;
 }
 
