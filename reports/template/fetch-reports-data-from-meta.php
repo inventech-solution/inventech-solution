@@ -46,19 +46,16 @@ function groupAdsData(ads, groupBy) {
 function computeMetricsByGroup(groups) {
     const result = {};
     const metricNames = Object.keys(window.metrics || {});
-
     Object.keys(groups).forEach(key => {
         const adsData = groups[key];
-        result[key] = {};
-
+        const metricsForGroup = {};
         metricNames.forEach(metric => {
-            const fn = window.metrics[metric];
-            if (typeof fn === 'function') {
-                result[key][metric] = fn(adsData);
+            if (typeof window.metrics[metric] === 'function') {
+                metricsForGroup[metric] = window.metrics[metric](adsData);
             }
         });
+        result[key] = metricsForGroup;
     });
-
     return result;
 }
 
