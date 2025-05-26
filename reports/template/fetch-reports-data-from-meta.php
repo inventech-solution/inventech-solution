@@ -4,7 +4,8 @@
 
 function groupAdsData(ads, groupBy) {
     const groups = {};
-    ads.forEach(ad => {
+    const adArray = Array.isArray(ads) ? ads : (ads && Array.isArray(ads.data) ? ads.data : []);
+    adArray.forEach(ad => {
         let key;
         switch (groupBy) {
             case 'Ad Name':
@@ -46,13 +47,13 @@ function computeMetricsByGroup(groups) {
     const result = {};
     Object.keys(groups).forEach(key => {
         const adsData = groups[key];
-        result[key] = {
-            spend: window.metrics.spend(adsData),
-            impressions: window.metrics.impressions(adsData),
-            clicks: window.metrics.clicks(adsData),
-            ctr: window.metrics.ctr(adsData),
-            purchase_roas: window.metrics.purchase_roas(adsData)
-        };
+        result[key] = {};
+        Object.keys(window.metrics).forEach(metricName => {
+            const metricFn = window.metrics[metricName];
+            if (typeof metricFn === 'function') {
+                result[key][metricName] = metricFn(adsData);
+            }
+        });
     });
     return result;
 }
@@ -77,7 +78,7 @@ function fetchReportData(start, end) {
             if (response.success) {
                 console.log('Raw API Data:', response.data);
 
-                const groups = groupAdsData(response.data || [], currentState.groupBy || 'Ad Name');
+                const groups = groupAdsData(response.data, currentState.groupBy || 'Ad Name');
                 console.log('Grouped Ads:', groups);
                 const processed = computeMetricsByGroup(groups);
 
