@@ -1,4 +1,13 @@
-<div id="metric-cards" class="row"></div>
+<div id="metric-cards" class="row" x-data="cardApp" x-init="init()">
+    <template x-for="id in metrics" :key="id">
+        <div class="col-md-4 mb-3">
+            <div class="card-item">
+                <div class="card-name" x-text="metricName(id)"></div>
+                <div class="card-value" :data-slug="metricSlug(id)" x-text="getValue(metricSlug(id))"></div>
+            </div>
+        </div>
+    </template>
+</div>
 
 <style>
 .card-item {
@@ -20,65 +29,53 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    function slugify(name) {
-        if (!name) return '';
-        const paren = name.match(/\(([^)]+)\)$/);
-        if (paren) return paren[1].toLowerCase();
-        return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-    }
-    const cardApp = {
+document.addEventListener('alpine:init', () => {
+    Alpine.data('cardApp', () => ({
         metrics: Array.isArray(currentState.card_metrics) ? [...currentState.card_metrics] : [],
         data: window.reportMetrics || {},
+
         init() {
-            window.addEventListener('metricsChanged', (e) => {
+            window.addEventListener('metricsChanged', e => {
                 this.metrics = e.detail || [];
-                console.debug('metricsChanged', this.metrics);
-                this.render();
             });
-            window.addEventListener('reportDataUpdated', (e) => {
+
+            window.addEventListener('reportDataUpdated', e => {
                 this.data = e.detail || {};
-                console.debug('reportDataUpdated', this.data);
-                this.render();
             });
+
             if (!window.metricStore.loaded) {
-                console.debug('loading metric definitions for cards');
-                window.metricStore.load().then(() => {
-                    console.debug('metric definitions loaded');
-                    this.render();
-                });
+                window.metricStore.load();
             }
-            this.render();
         },
+
+        slugify(name) {
+            if (!name) return '';
+            const paren = name.match(/\(([^)]+)\)$/);
+            if (paren) return paren[1].toLowerCase();
+            return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+        },
+
+        metricInfo(id) {
+            return window.metricStore.getById(Number(id));
+        },
+
+        metricName(id) {
+            const info = this.metricInfo(id);
+            return info ? info.name : '';
+        },
+
+        metricSlug(id) {
+            const info = this.metricInfo(id);
+            if (!info) return '';
+            return info.slug || this.slugify(info.name || '');
+        },
+
         getValue(slug) {
             const group = Object.keys(this.data)[0];
             if (!group || !this.data[group]) return '-';
             const val = this.data[group][slug];
             return val !== undefined ? val : '-';
-        },
-        render() {
-            const container = document.getElementById('metric-cards');
-            if (!container) return;
-            container.innerHTML = '';
-            const group = Object.keys(this.data)[0];
-            if (!group) {
-                console.debug('no data group yet, skipping render');
-                return;
-            }
-            this.metrics.forEach(id => {
-                const info = window.metricStore.getById(Number(id));
-                if (!info) return;
-                const slug = info.slug || slugify(info.name || '');
-                const value = this.getValue(slug);
-                console.debug('render card', {id, name: info.name, slug, value});
-                const col = document.createElement('div');
-                col.className = 'col-md-4 mb-3';
-                col.innerHTML = `<div class="card-item"><div class="card-name">${info.name}</div><div class="card-value" data-slug="${slug}">${value}</div></div>`;
-                container.appendChild(col);
-            });
         }
-    };
-    cardApp.init();
-    window.cardApp = cardApp;
+    }));
 });
 </script>
