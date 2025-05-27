@@ -17,6 +17,7 @@ if (is_array($checkReportIdDetails) && isset($checkReportIdDetails['report_type'
     $selectedGroupBy = $checkReportIdDetails['grouping'];
     $savedDateRange = $checkReportIdDetails['date_range'];
     $card_metrics_json = $checkReportIdDetails['card_metrics'] ?? '[]';
+    $table_metrics_json = $checkReportIdDetails['metrics'] ?? '[]';
     include "creatives.php"; // Include the creatives report
 }
 ?>
