@@ -36,22 +36,27 @@ document.addEventListener('alpine:init', () => {
         ready: false,
 
         init() {
+           const setMetrics = () => {
+                this.metrics = Array.isArray(currentState.card_metrics)
+                    ? [...currentState.card_metrics] : [];
+            };
+
+            if (window.metricStore.loaded) {
+                setMetrics();
+            } else {
+                window.metricStore.load().then(setMetrics);
+            }
+
             window.addEventListener('reportDataUpdated', e => {
                 this.data = e.detail || {};
                 if (!this.ready) {
-                    this.metrics = Array.isArray(currentState.card_metrics)
-                        ? [...currentState.card_metrics] : [];
+                    setMetrics();
                     this.ready = true;
                 }
             });
-
             window.addEventListener('metricsChanged', e => {
                 this.metrics = e.detail || [];
             });
-
-            if (!window.metricStore.loaded) {
-                window.metricStore.load();
-            }
         },
 
         slugify(name) {
@@ -70,10 +75,15 @@ document.addEventListener('alpine:init', () => {
             return info ? info.name : '';
         },
 
-        metricSlug(id) {
+         metricSlug(id) {
             const info = this.metricInfo(id);
             if (!info) return '';
-            return info.slug || this.slugify(info.name || '');
+            return (
+                info.apiName ||
+                info.api_name ||
+                info.slug ||
+                this.slugify(info.name || '')
+            );
         },
 
         getValue(slug) {
