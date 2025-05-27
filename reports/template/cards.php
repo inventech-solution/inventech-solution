@@ -1,4 +1,4 @@
-<div id="metric-cards" class="row" x-data="cardApp" x-init="init()">
+<div id="metric-cards" class="row" x-data="cardApp" x-show="ready" x-cloak>
     <template x-for="id in metrics" :key="id">
         <div class="col-md-4 mb-3">
             <div class="card-item">
@@ -31,21 +31,33 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('cardApp', () => ({
-        metrics: Array.isArray(currentState.card_metrics) ? [...currentState.card_metrics] : [],
-        data: window.reportMetrics || {},
+        metrics: [],
+        data: {},
+        ready: false,
 
         init() {
-            window.addEventListener('metricsChanged', e => {
-                this.metrics = e.detail || [];
-            });
+            const setMetrics = () => {
+                this.metrics = Array.isArray(currentState.card_metrics)
+                    ? [...currentState.card_metrics] : [];
+            };
+
+            if (window.metricStore.loaded) {
+                setMetrics();
+            } else {
+                window.metricStore.load().then(setMetrics);
+            }
 
             window.addEventListener('reportDataUpdated', e => {
                 this.data = e.detail || {};
+                if (!this.ready) {
+                    setMetrics();
+                    this.ready = true;
+                }
             });
 
-            if (!window.metricStore.loaded) {
-                window.metricStore.load();
-            }
+            window.addEventListener('metricsChanged', e => {
+                this.metrics = e.detail || [];
+            });
         },
 
         slugify(name) {
@@ -67,7 +79,12 @@ document.addEventListener('alpine:init', () => {
         metricSlug(id) {
             const info = this.metricInfo(id);
             if (!info) return '';
-            return info.slug || this.slugify(info.name || '');
+            return (
+                info.apiName ||
+                info.api_name ||
+                info.slug ||
+                this.slugify(info.name || '')
+            );
         },
 
         getValue(slug) {
