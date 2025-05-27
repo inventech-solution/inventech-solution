@@ -36,7 +36,7 @@ document.addEventListener('alpine:init', () => {
         ready: false,
 
         init() {
-            const setMetrics = () => {
+           const setMetrics = () => {
                 this.metrics = Array.isArray(currentState.card_metrics)
                     ? [...currentState.card_metrics] : [];
             };
@@ -54,7 +54,6 @@ document.addEventListener('alpine:init', () => {
                     this.ready = true;
                 }
             });
-
             window.addEventListener('metricsChanged', e => {
                 this.metrics = e.detail || [];
             });
@@ -76,7 +75,7 @@ document.addEventListener('alpine:init', () => {
             return info ? info.name : '';
         },
 
-        metricSlug(id) {
+         metricSlug(id) {
             const info = this.metricInfo(id);
             if (!info) return '';
             return (
