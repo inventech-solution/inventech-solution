@@ -2,7 +2,8 @@
 let currentState = {
     dateRange: '',
     groupBy: '',
-    card_metrics: [] 
+    card_metrics: [],
+    table_metrics: []
 };
 
 let initialState = { ...currentState };

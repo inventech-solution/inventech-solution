@@ -29,6 +29,9 @@
                     <div x-show="activeTab === 'section2'" class="bg-white p-4 rounded-xl shadow-sm mb-6 row" style="border: 1px solid #e2e2e2;"><!-- Chart -->
                         <?php include "template/chart.php"; ?>
                     </div>
+                    <div x-show="activeTab === 'section3'" class="bg-white p-4 rounded-xl shadow-sm mb-6 row" style="border: 1px solid #e2e2e2;"><!-- Table -->
+                        <?php include "template/table.php"; ?>
+                    </div>
                 </div>
             </div>
         </div>

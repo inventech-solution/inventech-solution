@@ -52,10 +52,15 @@
                 class="border border-gray-300 rounded-md px-2 pb-1 pt-2 text-sm" style="border-top-right-radius: 0; border-bottom-right-radius: 0; vertical-align: middle;margin-right:-2px;">
             <i class="hgi hgi-stroke hgi-school-report-card"></i>
         </button>
-        <button @click="activeTab = 'section2'" 
+        <button @click="activeTab = 'section2'"
                 :class="activeTab === 'section2' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'"
                 class="border border-gray-300 rounded-md px-2 pb-1 pt-2 text-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0; vertical-align: middle;margin-left:-2px;">
             <i class="hgi hgi-stroke hgi-chart-line-data-02"></i>
+        </button>
+        <button @click="activeTab = 'section3'"
+                :class="activeTab === 'section3' ? 'text-blue-600 bg-blue-50' : 'text-gray-500'"
+                class="border border-gray-300 rounded-md px-2 pb-1 pt-2 text-sm" style="margin-left:-2px;">
+            <i class="hgi hgi-stroke hgi-table"></i>
         </button>
     </div>
 </div>
