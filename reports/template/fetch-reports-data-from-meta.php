@@ -2,69 +2,78 @@
 // public/js/ajax/fetchReportData.js
 
 
-function groupAdsData(ads, groupBy) {
+// Group ads data based on a chosen key
+window.groupAdsData = function(ads, groupBy = 'Ad Name') {
     const groups = {};
-    const adArray = Array.isArray(ads) ? ads : (ads && Array.isArray(ads.data) ? ads.data : []);
+    const adArray = Array.isArray(ads) ? ads : (ads?.data || []);
+
     adArray.forEach(ad => {
-        // Facebook API returns insights as an object with a `data` array
-        // but our metric calculations expect `insights` to be an array.
-        if (ad.insights && Array.isArray(ad.insights.data)) {
+        if (Array.isArray(ad.insights?.data)) {
             ad.insights = ad.insights.data;
         }
 
-        let key;
+        let key = 'Ungrouped';
         switch (groupBy) {
             case 'Ad Name':
-                key = ad.name || 'Unknown';
-                break;
+                key = ad.name || 'Unknown'; break;
             case 'Creative':
-                key = ad.creative?.object_type || 'Unknown';
-                break;
+                key = ad.creative?.object_type || 'Unknown'; break;
             case 'Copy':
-                key = ad.creative?.body || 'Unknown';
-                break;
+                key = ad.creative?.body || 'Unknown'; break;
             case 'Headline':
-                key = ad.creative?.object_story_spec?.link_data?.name || 'Unknown';
-                break;
+                key = ad.creative?.object_story_spec?.link_data?.name || 'Unknown'; break;
             case 'Landing Page':
-                key = ad.creative?.link_destination_display_url || 'Unknown';
-                break;
+                key = ad.creative?.link_destination_display_url || 'Unknown'; break;
             case 'CTA Button':
-                key = ad.creative?.call_to_action_type || 'Unknown';
-                break;
+                key = ad.creative?.call_to_action_type || 'Unknown'; break;
             case 'Discount Code':
-                key = ad.creative?.asset_feed_spec?.bodies?.[0]?.text || 'Unknown';
-                break;
+                key = ad.creative?.asset_feed_spec?.bodies?.[0]?.text || 'Unknown'; break;
             case 'Post ID':
-                key = ad.creative?.object_story_id || 'Unknown';
-                break;
-            default:
-                key = 'Ungrouped';
+                key = ad.creative?.object_story_id || 'Unknown'; break;
         }
+
         if (!groups[key]) {
             groups[key] = [];
         }
         groups[key].push(ad);
     });
-    return groups;
-}
 
+    return groups;
+};
+
+// Compute metrics for each group using window.metrics
 function computeMetricsByGroup(groups) {
     const result = {};
-    Object.keys(groups).forEach(key => {
-        const adsData = groups[key];
-        result[key] = {};
-        Object.keys(window.metrics).forEach(metricName => {
-            const metricFn = window.metrics[metricName];
-            if (typeof metricFn === 'function') {
-                result[key][metricName] = metricFn(adsData);
+
+    for (const key in groups) {
+        const ads = groups[key];
+        const ad = ads[0]; // take one example ad
+
+        result[key] = {
+            meta: {
+                name: ad.name || '',
+                thumbnail: ad.creative?.image_url || '',
+                videoUrl: ad.creative?.video_data?.video_url || '',
+                postId: ad.creative?.object_story_id || '',
+                cta: ad.creative?.call_to_action_type || ''
+            },
+            metrics: {}
+        };
+
+        for (const metric in window.metrics) {
+            const fn = window.metrics[metric];
+            if (typeof fn === 'function') {
+                result[key].metrics[metric] = fn(ads);
             }
-        });
-    });
+        }
+    }
+
     return result;
 }
 
-function fetchReportData(start, end) {
+
+// Fetch report data and dispatch relevant events
+window.fetchReportData = function(start, end) {
     console.log('Fetching report data for:', start, 'to', end);
 
     $.ajax({
@@ -76,41 +85,42 @@ function fetchReportData(start, end) {
             group_by: currentState.groupBy || 'Ad Name'
         },
         dataType: 'json',
-        beforeSend: function() {
+        beforeSend: () => {
             $('#loading-indicator').show();
             window.dispatchEvent(new Event('reportDataLoading'));
         },
-        success: function(response) {
+        success: (response) => {
             $('#loading-indicator').hide();
-            if (response.success) {
-                console.log('Raw API Data:', response.data);
-
-                const groups = groupAdsData(response.data, currentState.groupBy || 'Ad Name');
-                console.log('Grouped Ads:', groups);
-                const processed = computeMetricsByGroup(groups);
-
-                console.log('Processed Metrics:', processed);
-                window.reportMetrics = processed;
-                window.dispatchEvent(new CustomEvent('reportDataUpdated', { detail: processed }));
-
-                const firstGroup = Object.keys(processed)[0];
-                if (firstGroup && processed[firstGroup].spend !== undefined) {
-                    $('#total-spend').text(`$${processed[firstGroup].spend}`);
-                }
-            } else {
+            if (!response.success) {
                 console.error('API Error:', response.message);
                 alert('Failed to fetch report data');
+                return;
+            }
+
+            const grouped = groupAdsData(response.data, currentState.groupBy);
+            console.log('Grouped Ads:', grouped);
+
+            const processed = computeMetricsByGroup(grouped);
+            console.log('Processed Metrics:', processed);
+
+            window.reportMetrics = processed;
+            window.dispatchEvent(new CustomEvent('reportDataUpdated', { detail: processed }));
+
+            const firstGroup = Object.values(processed)[0];
+            const spend = firstGroup?.spend;
+            if (spend !== undefined) {
+                $('#total-spend').text(`$${spend}`);
             }
         },
-        error: function(xhr, status, error) {
+        error: (_, __, error) => {
             $('#loading-indicator').hide();
             console.error('AJAX Error:', error);
             alert('An error occurred while fetching report data.');
         }
     });
-}
+};
 
-// Make available globally before document ready
+// Adapter for picker or external trigger
 window.fetchReportDataFromPicker = function(start, end) {
     fetchReportData(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
 };
@@ -118,7 +128,7 @@ window.fetchReportDataFromPicker = function(start, end) {
 window.dispatchEvent(new Event('fetchReportDataReady'));
 
 $(document).ready(function() {
-    // Any code that uses fetchReportDataFromPicker now works
+    // Code that depends on fetchReportDataFromPicker can run now
 });
 
 </script>
