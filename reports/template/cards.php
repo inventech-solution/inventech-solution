@@ -1,4 +1,4 @@
-<div id="metric-cards" class="row" x-data="cardApp" x-init="init()">
+<div id="metric-cards" class="row" x-data="cardApp" x-show="ready" x-cloak>
     <template x-for="id in metrics" :key="id">
         <div class="col-md-4 mb-3">
             <div class="card-item">
@@ -31,16 +31,22 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('cardApp', () => ({
-        metrics: Array.isArray(currentState.card_metrics) ? [...currentState.card_metrics] : [],
-        data: window.reportMetrics || {},
+        metrics: [],
+        data: {},
+        ready: false,
 
         init() {
-            window.addEventListener('metricsChanged', e => {
-                this.metrics = e.detail || [];
-            });
-
             window.addEventListener('reportDataUpdated', e => {
                 this.data = e.detail || {};
+                if (!this.ready) {
+                    this.metrics = Array.isArray(currentState.card_metrics)
+                        ? [...currentState.card_metrics] : [];
+                    this.ready = true;
+                }
+            });
+
+            window.addEventListener('metricsChanged', e => {
+                this.metrics = e.detail || [];
             });
 
             if (!window.metricStore.loaded) {
